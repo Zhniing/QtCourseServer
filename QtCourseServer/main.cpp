@@ -48,7 +48,7 @@ void sendStockBrowser(int start) {
 	//}
 }
 
-void sendStockHistory() {
+void sendStockHistory(int n) {
 	io_service ios;
 	ip::tcp::acceptor acceptor(ios, ip::tcp::endpoint(ip::tcp::v4(), 11231));
 
@@ -58,7 +58,31 @@ void sendStockHistory() {
 	vector<string> tupleVec;
 	string tuple;
 	getline(ifs, tuple);
-	for (int i = 0; i < 200; i++) {
+	for (int i = 0; i < n; i++) {
+		getline(ifs, tuple);
+
+		ip::tcp::iostream tcp_stream;
+		acceptor.accept(*tcp_stream.rdbuf());
+		tcp_stream << tuple;
+
+		//sock.write_some(buffer(tuple));
+		if (i % 100 == 0) {
+			cout << "send: " << i << endl;
+		}
+	}
+}
+
+void sendStockCandle(int n) {
+	io_service ios;
+	ip::tcp::acceptor acceptor(ios, ip::tcp::endpoint(ip::tcp::v4(), 11231));
+
+	boost::filesystem::path p("..\\data3001_60000.csv");
+	boost::filesystem::ifstream ifs(p);//���ļ��ж�ȡ����
+
+	vector<string> tupleVec;
+	string tuple;
+	getline(ifs, tuple);
+	for (int i = 0; i < n; i++) {
 		getline(ifs, tuple);
 
 		ip::tcp::iostream tcp_stream;
@@ -145,8 +169,13 @@ int main() {
 		}
 		else if (cmd == "h") {
 			cout << "Sending StockHistory..." << endl;
-			sendStockHistory();//��½�ɹ���ӷ���˻�ȡ����
+			sendStockHistory(stoi(cmdVec[1]));//��½�ɹ���ӷ���˻�ȡ����
 			cout << "StockHistory send complete." << endl;
+		}
+		else if (cmd == "k") {
+			cout << "Sending StockCandle..." << endl;
+			sendStockCandle(stoi(cmdVec[1]));
+			cout << "StockCandle send complete." << endl;
 		}
 	}
 	//sendData();
